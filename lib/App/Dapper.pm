@@ -14,9 +14,6 @@ use warnings FATAL => 'all';
 
 use vars '$VERSION';
 
-use File::Slurp;
-use Template::Stash;
-
 use Exporter qw(import);
 use IO::Dir;
 
@@ -46,11 +43,11 @@ my $ID = 0;
 
 =head1 VERSION
 
-Version 0.19
+Version 0.18
 
 =cut
 
-our $VERSION = '0.19';
+our $VERSION = '0.18';
 
 our @EXPORT = qw($VERSION);
 
@@ -389,6 +386,7 @@ sub transform {
 sub render {
     my ($self) = @_;
 
+<<<<<<< HEAD
     my $stash = Template::Stash->new();
     $stash->set('site', $self->{site});
     
@@ -414,16 +412,13 @@ sub render {
     }
     closedir(DIR);
 
+=======
+>>>>>>> parent of 3351fe3... merge in pull request from ￼
     my $tt = Template::Alloy->new({
         INCLUDE_PATH => $self->{layout},
         ANYCASE => 1,
         ENCODING => 'utf8',
         #STRICT => 1,
-        EVAL_PERL => 1,
-        LOAD_PERL => 1,
-        STASH => $stash,
-        #PLUGIN_BASE => [   'My::Plugin', 'Your::Plugin' ], 
-#        PLUGIN_BASE => (@my_PERL_PLUGIN_BASE),
         FILTERS => {
             'xml_escape' => \&App::Dapper::Filters::xml_escape,
             'date_to_xmlschema' => \&App::Dapper::Filters::date_to_xmlschema,
