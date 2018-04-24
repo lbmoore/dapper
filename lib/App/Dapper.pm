@@ -386,34 +386,6 @@ sub transform {
 sub render {
     my ($self) = @_;
 
-<<<<<<< HEAD
-    my $stash = Template::Stash->new();
-    $stash->set('site', $self->{site});
-    
-    my $dir = $self->{site}->{'Dapper_libs'};
-    print Dump $dir;
-    opendir(DIR, $dir) or die $!;
-    while (my $file = readdir(DIR)) {
-# Use a regular expression to ignore files beginning with a period
-      next if ($file =~ m/^\./);
-      print "$dir" . "/" . "$file" . "\n";
-      my $command = read_file($dir . '/' . $file);
-     print "$command" . "\n";
-      my $resEval = eval $command;
-      unless($resEval) {
-        print $@;
-      }
-=pod
-      if ($@) {
-        carp "Inner function failed: $@";
-    #do_something_with($@);
-      }
-=cut      
-    }
-    closedir(DIR);
-
-=======
->>>>>>> parent of 3351fe3... merge in pull request from ￼
     my $tt = Template::Alloy->new({
         INCLUDE_PATH => $self->{layout},
         ANYCASE => 1,
@@ -483,10 +455,7 @@ sub render {
     $self->copy(".", $self->{output});
 }
 
-# sub serve - Serve the site locally. Pass in the port number. 
-# The port number will be used to serve the site contents from 
-# the output directory like this: http://localhost:<port>. 
-# Here is an example, using the default port 8000:
+# sub serve - Serve the site locally. Pass in the port number. The port number will be used to serve the site contents from the output directory like this: http://localhost:<port>. Here is an example, using the default port 8000:
 # 
 #    use App::Dapper;
 #
@@ -502,7 +471,7 @@ sub serve {
 
     $port = $DEFAULT_PORT unless $port;
 
-    my $s = HTTP::Server::Brick->new(port=>$port,fork=>1);
+    my $s = HTTP::Server::Brick->new(port=>$port);
     $s->add_type('text/html' => qw(^[^\.]+$));
     $s->mount("/"=>{ path => $self->{output} });
 
@@ -716,9 +685,7 @@ sub build_inventory {
     push @{$self->{site}->{pages}}, \%page;
 }
 
-# sub copy(sourcedir, outputdir) - Copies files and directories 
-# from <sourcedir> to <outputdir> as long as they do not made what 
-# is contained in $self->{site}->{ignore}.
+# sub copy(sourcedir, outputdir) - Copies files and directories from <sourcedir> to <outputdir> as long as they do not made what is contained in $self->{site}->{ignore}.
 
 sub copy {
     my ($self, $dir, $output) = @_;
