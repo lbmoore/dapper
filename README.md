@@ -229,6 +229,7 @@ structure will be created:
     _config.yml
     _layout/
         index.html
+    _output/
     _source/
         index.md
 
@@ -243,6 +244,13 @@ configuration file is as follows:
     # Dapper configuration file
     ---
     name : My Site
+    ignore:
+        - "^\."
+        - "^.*~$"
+        - "^Makefile$"
+    ignoredir :
+        - "^\."
+        - "^_output"
 
 If you want to use a separate source, layout, or output directory, you may
 specify it in this file. For instance:
@@ -250,9 +258,16 @@ specify it in this file. For instance:
     # Dapper configuration file
     ---
     name : My Site
+    ignore:
+        - "^\."
+        - "^.*~$"
+        - "^Makefile$"
+    ignoredir :
+        - "^\."
+        - "^_output"
     source : _source
     layout : _layout
-    output : _output
+    output : _site
 
 There are a few definitions that affect the way that Dapper behaves. Those
 are defined in the [Configuration](#configuration) section. Those and any
@@ -393,6 +408,9 @@ pairs or arrays, arranged hierarchically:
         - "^design$"
         - "^README.md$"
         - "^Makefile$"
+    ignoredir :
+        - "^\."
+        - "^_output"
 
 Any variable specified in `_config.yml` can be used in a template. In the
 example above, name can be used like this:
