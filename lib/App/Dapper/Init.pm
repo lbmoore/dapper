@@ -14,7 +14,7 @@ file, a layout template, and a starter post.
 
 use utf8;
 use open ':std', ':encoding(UTF-8)';
-use 5.8.0;
+use 5.10.0;
 use strict;
 use warnings FATAL => 'all';
 
@@ -53,6 +53,14 @@ my $proj_file_template_content = <<'PROJ_FILE_TEMPLATE';
 # Dapper configuration file
 ---
 name : My Site
+ignore:
+    - "^\."
+    - "^.*~$"
+    - "^Makefile$"
+ignoredir :
+    - "^\."
+    - "^_output"
+
 
 PROJ_FILE_TEMPLATE
 
@@ -73,6 +81,8 @@ sub init {
 
     App::Dapper::Utils::create_dir($layout);
     App::Dapper::Utils::create_file("$layout/$templates_index_name", $templates_index_content);
+
+    App::Dapper::Utils::create_dir($output)
 }
 
 1;
