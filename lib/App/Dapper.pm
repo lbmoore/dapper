@@ -8,7 +8,7 @@ App::Dapper - A publishing tool for static websites.
 
 use utf8;
 use open ':std', ':encoding(UTF-8)';
-use 5.8.0;
+use 5.10.0;
 use strict;
 use warnings FATAL => 'all';
 
@@ -43,11 +43,11 @@ my $ID = 0;
 
 =head1 VERSION
 
-Version 0.18
+Version 0.18.3
 
 =cut
 
-our $VERSION = '0.18';
+our $VERSION = '0.18.3';
 
 our @EXPORT = qw($VERSION);
 
@@ -350,8 +350,8 @@ When the site is built, it is done in three steps:
 
 sub build {
     my($self) = @_;
-   
-    $ID = 0; 
+
+    $ID = 0;
 
     $self->parse();
     $self->transform();
@@ -398,13 +398,13 @@ sub render {
             'smart' => \&App::Dapper::Filters::smart,
             'json' => \&App::Dapper::Filters::json,
         },
-        #ERROR => 'alloy_errors.html', 
+        #ERROR => 'alloy_errors.html',
         #DEBUG => DEBUG_ALL,
-    }) || die "$Template::ERROR\n";        
+    }) || die "$Template::ERROR\n";
 
     for my $page (@{$self->{site}->{pages}}) {
 
-        #print Dump $page->{content};
+#		print Dumper $page->{content};
 
         if (not $page->{layout}) {
             $page->{layout} = "index";
@@ -448,15 +448,16 @@ sub render {
         }
     }
 
-    #print Dumper $self->{site};
+#    print Dumper $self->{site};
 
-    #print Dumper($self->{site}); 
     # copy additional files and directories
     $self->copy(".", $self->{output});
 }
 
-# sub serve - Serve the site locally. Pass in the port number. The port number will be used to serve the site contents from the output directory like this: http://localhost:<port>. Here is an example, using the default port 8000:
-# 
+# sub serve - Serve the site locally. Pass in the port number. The port number will be used to serve
+# the site contents from the output directory like this: http://localhost:<port>. Here is an example,
+# using the default port 8000:
+#
 #    use App::Dapper;
 #
 #    my $d = App::Dapper->new();
@@ -488,11 +489,27 @@ sub read_project {
     # Graft together
     @{$self->{site}}{keys %{$config}} = values %$config;
 
+    # Compile regexs
+    my $i;
+    for ($i=0; $i <= $#{$self->{site}->{ignore}}; $i++) {
+
+        ${$self->{site}->{ignore}}[$i] = qr/${$self->{site}->{ignore}}[$i]/;
+
+    }
+    for ($i=0; $i <= $#{$self->{site}->{ignoredir}}; $i++) {
+
+        ${$self->{site}->{ignoredir}}[$i] = qr/${$self->{site}->{ignoredir}}[$i]/;
+
+    }
+    push @{$self->{site}->{ignoredir}}, $self->{output};
+    push @{$self->{site}->{ignoredir}}, $self->{layout};
+    push @{$self->{site}->{ignoredir}}, $self->{config};
+
     die "error: \"source\" must be defined in project file\n" unless defined $self->{source};
     die "error: \"output\" must be defined in project file\n" unless defined $self->{output};
     die "error: \"layout\" must be defined in project file\n" unless defined $self->{layout};
 
-    #print Dump($self->{site});
+#	print Dumper($self->{site});
 }
 
 # sub read_templates - Read the content of the templates specified in the project configuration file.
@@ -552,17 +569,20 @@ sub walk {
   if (defined $source_handle) {
 
     # cycle through each element in the current directory
-    while(defined($directory_element = $source_handle->read)) {
+IGN:  while(defined($directory_element = $source_handle->read)) {
 
       # print "directory element:$source/$directory_element\n";
       if(-d "$source_dir/$directory_element" and $directory_element ne "." and $directory_element ne "..") {
         $self->walk("$source_dir/$directory_element", "$output_dir/$directory_element");
       }
       elsif(-f "$source_dir/$directory_element" and $directory_element ne "." and $directory_element ne "..") {
-   
-        # Skip dot files
-        if ($directory_element =~ /^\./) { next; }
-    
+
+        # Skip ignore files
+        foreach my $regexp (@{$self->{site}->{ignore}}) {
+
+            if ($directory_element =~ $regexp) { next IGN; }
+
+        }
         # Construct output file name, which is a combination
         # of the stem of the source file and the extension of the template.
         # Example:
@@ -571,7 +591,7 @@ sub walk {
         #   - Destination: index.html
         my $source = "$source_dir/$directory_element";
         my $output = "$output_dir/$directory_element";
-      
+
         $self->build_inventory($source, $output);
       }
     }
@@ -589,6 +609,12 @@ sub build_inventory {
     my ($self, $source_file_name, $destination_file_name) = @_;
 
     my %page = ();
+
+    if (-B $source_file_name) { 
+
+        $self->{site}->{copyfile}->{$source_file_name} = $destination_file_name;
+        return;
+    }
 
     my $source_content = App::Dapper::Utils::read_file($source_file_name);
 
@@ -608,7 +634,7 @@ sub build_inventory {
         # print "Didn't find date for $source_file_name. Setting to file modified date of $date\n";
         $page{date} = $date;
     }
-   
+
     if($page{date} =~ /^(\d\d\d\d)-(\d\d)-(\d\d) (\d\d)\:(\d\d)\:(\d\d)$/) {
         $page{year} = $1;
         $page{month} = $2;
@@ -651,7 +677,7 @@ sub build_inventory {
     $page{source_file_extension} = App::Dapper::Utils::filter_extension($source_file_name);
 
     $page{filename} = App::Dapper::Utils::filter_stem("$destination_file_name") . $page{extension};
-    
+
     if(defined $page{categories}) {
         my $filename = $self->{site}->{output} . $page{url};
         $filename =~ s/\/$/\/index.html/; 
@@ -674,7 +700,7 @@ sub build_inventory {
 
     # Remove leading spaces and newline
     $page{content} =~ s/^[ \n]*//;
-    
+
     if ($page{categories}) {
         push @{$self->{site}->{categories}->{$page{categories}}}, \%page;
 
@@ -685,30 +711,27 @@ sub build_inventory {
     push @{$self->{site}->{pages}}, \%page;
 }
 
-# sub copy(sourcedir, outputdir) - Copies files and directories from <sourcedir> to <outputdir> as long as they do not made what is contained in $self->{site}->{ignore}.
+# sub copy(sourcedir, outputdir) - Copies files and directories from <sourcedir> to <outputdir>
+# as long as they do not made what is contained in $self->{site}->{ignore}.
 
 sub copy {
-    my ($self, $dir, $output) = @_;
+    my ($self) = @_;
 
-    opendir(DIR, $dir) or die $!;
-
-    DIR: while (my $file = readdir(DIR)) {
-        for my $i (@{ $self->{site}->{ignore} }) {
-            next DIR if ($file =~ m/$i/);
-        }
-
-        $output =~ s/\/$//;
-        my $command = "cp -r $file $output";
+    foreach my $file (sort keys %{$self->{site}->{copyfile}}) {
+        my $command = "cp -r $file $self->{site}->{copyfile}->{$file}";
         print $command . "\n";
         system($command);
     }
 
-    closedir(DIR);
 }
 
 =head1 AUTHOR
 
 Mark Benson, C<< <markbenson at vanilladraft.com> >>
+
+updates by
+
+Louis Moore, C<< <lbmoore at cpan.org> >>
 
 =head1 BUGS
 
