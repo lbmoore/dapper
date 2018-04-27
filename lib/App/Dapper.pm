@@ -43,11 +43,11 @@ my $ID = 0;
 
 =head1 VERSION
 
-Version 0.18.3
+Version 0.18.4
 
 =cut
 
-our $VERSION = '0.18.3';
+our $VERSION = '0.18.4';
 
 our @EXPORT = qw($VERSION);
 
