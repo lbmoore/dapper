@@ -60,6 +60,9 @@ ignore:
 ignoredir :
     - "^\."
     - "^_output"
+source : _source
+layout : _layout
+output : _output
 
 
 PROJ_FILE_TEMPLATE
@@ -74,7 +77,6 @@ After calling this method, the project may be built.
 sub init {
     my ($source, $output, $layout, $config) = @_;
 
-    App::Dapper::Utils::create_file($config, $proj_file_template_content);
 
     App::Dapper::Utils::create_dir($source);
     App::Dapper::Utils::create_file("$source/$source_index_name", $source_index_content);
@@ -82,7 +84,11 @@ sub init {
     App::Dapper::Utils::create_dir($layout);
     App::Dapper::Utils::create_file("$layout/$templates_index_name", $templates_index_content);
 
-    App::Dapper::Utils::create_dir($output)
+    App::Dapper::Utils::create_dir($output);
+
+    $proj_file_template_content .= "source : " . $source . "\nlayout : " . $layout . "\noutput : " . $output;
+
+    App::Dapper::Utils::create_file($config, $proj_file_template_content);
 }
 
 1;

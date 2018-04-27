@@ -334,7 +334,7 @@ sub init {
 Build the site. Example:
 
     use App::Dapper;
-    
+
     my $d = App::Dapper->new();
     $d->build();
 
@@ -489,6 +489,15 @@ sub read_project {
     # Graft together
     @{$self->{site}}{keys %{$config}} = values %$config;
 
+    # Overwrite default with site variables if different
+    unless ($self->{output} eq $self->{site}->{output}) { $self->{output} = $self->{site}->{output}; }
+    unless ($self->{layout} eq $self->{site}->{layout}) { $self->{layout} = $self->{site}->{layout}; }
+    unless ($self->{source} eq $self->{site}->{source}) { $self->{source} = $self->{site}->{source}; }
+
+    # No need to read output
+    push @{$self->{site}->{ignoredir}}, $self->{site}->{output};
+
+
     # Compile regexs
     my $i;
     for ($i=0; $i <= $#{$self->{site}->{ignore}}; $i++) {
@@ -501,9 +510,6 @@ sub read_project {
         ${$self->{site}->{ignoredir}}[$i] = qr/${$self->{site}->{ignoredir}}[$i]/;
 
     }
-    push @{$self->{site}->{ignoredir}}, $self->{output};
-    push @{$self->{site}->{ignoredir}}, $self->{layout};
-    push @{$self->{site}->{ignoredir}}, $self->{config};
 
     die "error: \"source\" must be defined in project file\n" unless defined $self->{source};
     die "error: \"output\" must be defined in project file\n" unless defined $self->{output};
