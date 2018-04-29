@@ -166,8 +166,30 @@ sub create_dir {
     $dirname = canonpath $dirname;
     die "Invalid number of arguments to create_dir" if @_ != 1;
 
-    mkdir($dirname)
-        or die "Could not create directory '$dirname' $!";
+    if (-e $dirname) {
+
+        print "Verifying $dirname exists.\n";
+
+    }
+    else {
+
+        mkdir($dirname)
+            or die "Could not create directory '$dirname' $!";
+        return;
+
+    }
+
+    unless ( -w $dirname) {
+
+        die "'$dirname' exists and is not writeable\n";
+
+    }
+    unless (-d $dirname) {
+
+        die "'$dirname' exists and is not a directory\n";
+
+    }
+    return;
 }
 
 1;
