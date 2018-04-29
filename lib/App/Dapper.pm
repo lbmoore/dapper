@@ -43,11 +43,11 @@ my $ID = 0;
 
 =head1 VERSION
 
-Version 0.18.4
+Version 0.18.5
 
 =cut
 
-our $VERSION = '0.18.4';
+our $VERSION = '0.18.5';
 
 our @EXPORT = qw($VERSION);
 
@@ -471,6 +471,8 @@ sub serve {
     my($self, $port) = @_;
 
     $port = $DEFAULT_PORT unless $port;
+
+    $self->read_project();
 
     my $s = HTTP::Server::Brick->new(port=>$port,fork=>1);
     $s->add_type('text/html' => qw(^[^\.]+$));
