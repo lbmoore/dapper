@@ -60,10 +60,6 @@ ignore:
 ignoredir :
     - "^\."
     - "^_output"
-source : _source
-layout : _layout
-output : _output
-
 
 PROJ_FILE_TEMPLATE
 
